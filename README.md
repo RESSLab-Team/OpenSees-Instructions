@@ -333,7 +333,8 @@ You could probably use gfortran instead of Intel fortran, but I don't go into th
 
 1. Link the fortran compiler
 1. Choose the build configuration (either Debug or Release)
-1. Right click on the **OpenSees** project in the **Solution Explorer** and select** Build**
+1. Right click on the **OpenSees** project in the **Solution Explorer** and select **Build**
+
 If there are no errors an OpenSees.exe will be created in `OpenSees/Win64/bin/`.
 
 
@@ -373,7 +374,8 @@ Now we are ready to build the OpenSeesPy36 project:
 1. Accept the changes
 1. Choose the build configuration (either Debug or Release)
 1. Right click on the **OpenSeesPy36** project in the **Solution Explorer** and select **Build**
-If there are no errors an opensees.pyd will be created in `OpenSees/Win64/bin/py36/`
+
+If there are no errors an opensees.pyd will be created in `OpenSees/Win64/bin/py36/`.
 
 #### Compiling on Mac/Linux
 
@@ -399,7 +401,8 @@ Disclaimer: I have only used Mac and not Linux, but in theory the steps are simi
   - `/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/libquadmath.a`
   - `/usr/local/Cellar/openssl/1.0.2r/lib/libssl.dylib`
 - `make -B` to compile everything from scratch
-If there are no errors an opensees executable should appear in `/Users/username/bin`
+
+If there are no errors an opensees executable should appear in `/Users/username/bin`.
 
 
 Instructions for compiling OpenSeesPy on Mac/Linux are TBD.
