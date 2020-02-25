@@ -1,36 +1,39 @@
 # Adding to OpenSees
 
 This document includes instructions and best practices for adding new classes (e.g., materials, elements) to the OpenSees framework, and adding these changes to the OpenSees repository hosted on github.
-The target reader: is willing to google, has a background in civil/structural engineering, and has limited knowledge of object-oriented programming.
+The target reader: is aware of OpenSees, does not necessarily know a lot about git, and is willing to google things they don't know.
 
 ## Preliminaries
 
 ### Reading
 
-Read these articles before getting started to understand the logic behind the OpenSees design:
+Read these articles before getting started to understand the OpenSees design:
 * 10.1061/(ASCE)0733-9445(2008)134:4(562)
 * 10.1061/(ASCE)CP.1943-5487.0000002
 
 ### OpenSees is hosted on github...
 
 ... this means that you need to have some knowledge of `git` (the software behind github) and github itself (which is the website that hosts the OpenSees git repository).
-The less you know the more you will google.
+Unfortunately, the less you know the more you will have to google.
 There is jargon in this document (not only regarding git) - this is on purpose so that you can google and get accurate results to questions you may have (e.g., "add existing item to visual studio project").
 * I cannot explain everything about git and github - there are thousands of guides, tutorials, and stackexchange posts that explain things.
 * I will provide some basic commands and some basic ideas, however, you will probably need to google several things along the way unless you already have this knowledge.
 * I provide the command-line commands for using git, you will need to install `git` itself if it is not installed on your system.
-* There are tools for git integrated into VS that you can use instead of the command line - you can explore these instead of the commands provided in this document.
+* There are tools for git integrated into most editors that you can use instead of the command line - you can explore these instead of the commands provided in this document.
 
 ### Windows: Visual Studio
 
 I recommend to use the edition of Microsoft Visual Studio (VS) Community that corresponds to the OpenSees codebase.
-At the time of writing this is VS 2019, and it can change without any major notice as far as I know, you can figure it out by the build tool version :-).
+At the time of writing this is VS 2019, and it can change without any major notice as far as I know, you can figure it out by the build tool version.
 If you have an older version you just need to change the build tool version for each project in VS.
+I recommend that you use VS as an editor and to build OpenSees. 
 
 ### Mac and Linux
 
-TBD
-
+I recommend using Visual Studio Code as en editor on Mac and Linux, although this is more about personal preference, rather than necessity (as in the case of VS on Windows).
+Xcode, vim, emacs, Notepad++, etc., are fine too.
+Generally, it is more difficult to build OpenSees on a Mac/Linux than Windows the first time since there are a lot more system dependent includes.
+My advice would be to start with Windows if you have the choice.
 
 
 ## Guide
@@ -49,9 +52,9 @@ For the purpose of this document the fork will exist at https://github.com/ressl
 
 #### Clone your fork
 
-Once the fork is created, it only exists on some github server, you now need a local copy to edit (a clone) on your own computer.
-Open a terminal (e.g., command prompt or powershell on windows, or terminal on Mac).
-Navigate your terminal to the directory where you want the source files to be located, on Windows this can be anywhere on your system, on Mac this has to be your home directory (the "~" directory).
+Once the fork is created, it only exists on some github server, you now need a local copy (a clone) to edit on your own computer.
+I provide the instructions using a terminal (e.g., command prompt or powershell on windows, or terminal on Mac), however, many editors provide a user interface for these same commands.
+Navigate your terminal to the directory where you want the source files to be located, on Windows this can be anywhere on your system, on Mac this has to be your home directory (the "~" directory) due to how the file system is currently set-up.
 
 Create a clone of your fork using
 ```
@@ -82,7 +85,7 @@ The branch name should be short and descriptive of what changes will be made on 
 
 Here is the programming part, and I can't say much about that here.
 If you already have the source files written you just copy them to the correct directory in `OpenSees/SRC/`.
-Otherwise, you create new files directly in the correct directory, or edit existing files.
+Otherwise, create new files directly in the correct directory, or edit existing files.
 The correct directory depends on the files being added, for example:
 * Material -> `OpenSees/SRC/material/<uniaxial or nD>/`
 * Element -> `OpenSees/SRC/element/<your element dir>/`
@@ -94,14 +97,14 @@ Best practice is to use autoformatting for all your source files, see the Useful
 Only the 64bit OpenSees solution is supported since around 2019, open this solution in VS from `OpenSees/Win64/OpenSees.sln`.
 
 If you add the existing source files you need to let VS know about the additions.
+The VS solution needs to be updated because you or others will compile OpenSees on Windows at some point.
 For example, for the SLModel, add the .h and .cpp files as existing items to the material project under the uniaxial filter.
 If you want to create new files then add new items (the .h and .cpp files) to the appropriate project under the appropriate filter.
 
 #### Update the Makefiles
 
 `Makefile`s contain the instructions for Unix (i.e., Mac and Linux) build systems.
- Makefiles need to be updated because you or others will compile OpenSees on these systems at some point.
-This step must be done even if *you* are compiling on Windows.
+The Makefiles need to be updated because you or others will compile OpenSees on these systems at some point.
 The editing is simple for materials, e.g., for a uniaxial material add a line in `OpenSees/SRC/material/uniaxial/Makefile`:
 ```
 SLModel.o \
@@ -111,10 +114,10 @@ The idea is the same for adding elements, but slightly more complicated, look at
 #### Add the updates to the interpreters
 
 Interpreters read input files, create OpenSees models, and run these models.
-If the interpreter does not "know" about your additions then you cannot use any added materials/elements/etc.
+If the interpreter is not "aware" of e.g., your new material, then you cannot actually use it in an analysis.
 If you are just modifying existing code then you can ignore this.
 
-There are two interpreters that are used from what I see: the "standard" TCL interpreter, and the "up-and-coming" Python interpreter.
+There are two interpreters that are used from what I see: the TCL interpreter, and the Python interpreter.
 At the moment (early 2020) the TCL interpreter is most common.
 However, I see that there is a big push on developing the Python interpreter since Python is a better programming language than TCL, and package distribution is extremely convenient using `pip`.
 It is a good idea to make your additions available to both interpreters for maximum up-take now and in the future.
@@ -143,7 +146,7 @@ Near the top of the file:
 void* OPS_SLModel();
 ```
 and further down in the file:
-```
+```C++
 uniaxialMaterialsMap.insert(std::make_pair("SLModel", &OPS_SLModel));
 ```
 
@@ -169,7 +172,7 @@ It is best practice to create a test suite.
 A test suite contains all the input files used to validate your material/element/etc, and will be a separate repository.
 For example, you may have a personal repository called `github.com/resslabUser/SLModel-Testing`.
 As you encounter bugs, add a new input file that re-creates this bug and add this file to your test suite.
-You will build-up a suite that builds confidence in your implementation and eliminates bugs.
+You will build-up a suite that creates confidence in your implementation.
 Every time you update your source files, re-run the entire test suite to make sure that you didn't break anything that worked before, and ensure that you fixed the bug that you wanted to.
 
 
@@ -190,23 +193,24 @@ Once you are happy with the changes to branch, stage all the changes using
 ```
 git add -A
 ```
+or individual files can be staged using `git add <path to file>`.
 Then commit the changes to your branch using
 ```
 git commit
 ```
 You will have to write a commit message, more information about commit messages is provided below.
 
-#### Best practices
-
-##### Writing commit messages
+#### Writing commit messages
 
 Quick recommendations for writing commits:
 * Use max 80 characters in each line.
 * Be concise.
 * Use imperative statements (e.g., "Add the SLModel by Suzuki and Lignos", imagine you are giving commands to the computer).
 * The first line should summarize what you are changing, add additional lines starting with "-" to give specifics if necessary.
-* I like to group additional items as necessary
+* I like to group additional items if I made more than one task in a single commit, for example, a commit message may look like:
 ```
+<Major task that I did>
+
 -Add <something new you added>
 -Add <something else new>
 
@@ -215,9 +219,9 @@ Quick recommendations for writing commits:
 -Delete <something you deleted>
 ```
 
-##### How often to commit?
+#### How often to commit?
 
-It is best practice to commit after completing a particular task.
+In my opinion, it is best practice to commit after completing a particular task.
 The reason is that git keeps track of the differences between commits
 If you made an error in a particular task it is easier to identify the error when there is only one task per commit.
 This task structure also helps to break down the logic of actually writing the code.
@@ -237,12 +241,12 @@ Add the time integration to the SLModel.
 Once you have completed the first version of your material/element/etc. it is time to start the process of it being added to the OpenSees repository.
 Completed means that the code compiles (ideally tested on both Mac and Windows), and the output is validated with examples.
 
-Push the changes made to your branch to your fork on github using, e.g.,
+After commiting to a branch, push the changes to your fork on github using
 ```
-git push origin add_sl_mat
+git push origin <your branch>
 ```
 
-When you go to the page for your fork on github a bar should appear at the top to create a new pull request for the main OpenSees repository.
+When you go to the page for your fork on github a green bar should appear at the top to create a new pull request for the main OpenSees repository.
 Start a new pull request, below are some best practices:
 * Use a short descriptive title.
 * Add some concise details in the comments.
@@ -286,7 +290,7 @@ Second, pull the changes from the upstream repository into your local master bra
 git checkout master
 git pull upstream master
 ```
-This needs to be done everytime you want to update your local clone.
+This needs to be done every time you want to update your local clone.
 If there are any conflicts you need to resolve these and commit the changes before continuing.
 
 Your local master branch is now up-to-date with the upstream master.
@@ -300,48 +304,116 @@ This workflow is very useful if you have a separate branch with local changes us
 
 ### C++ style advice
 
-1. Use an editor that has an auto formatting feature (e.g., Visual Studio). If your editor does not, get a new editor and use that one instead.
+1. Use an editor that has an auto formatting feature (e.g., Visual Studio, Visual Studio Code).
 1. Set the editor for your preferences (e.g., I use spaces instead of tabs and a tab width of 2 for C++ and Fortran).
 1. *Always* autoformat your source code files before saving them (e.g., Ctrl-K, Ctrl-D in Visual Studio).
 
 
-### Compiling on Windows
+### Help for building OpenSees
 
-#### Link fortran compiler
+Regardless of your system, ensure that you have TCL installed according to the instructions provided on the OpenSees download page (http://opensees.berkeley.edu/OpenSees/user/download.php).
+
+#### Compiling on Windows
+
+##### Linking fortran compiler
 
 You will require the Intel Fortran compiler for Windows, this comes with the student license of Intel Parallel Studio.
 To link with the fortran compiler:
-1. Right click on the OpenSees project in the Solution Explorer and select Properties
-1. Make sure that in the Configuration bar "All Configurations" is selected
-1. Expand Linker under Configuration Properties and select General under Linker
-1. Click on Additional Include Directories in the main box and edit this entry
+1. Right click on the OpenSees project in the **Solution Explorer** and select **Properties**
+1. Make sure that in the Configuration bar **"All Configurations"** is selected
+1. Expand **Linker** under **Configuration Properties** and select **General** under Linker
+1. Click on **Additional Library Directories** in the main box and edit this entry
 1. Add another directory that includes the library files for intel fortran (e.g,. `C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019\windows\compiler\lib\intel64_win`)
 1. Accept the change by clicking OK etc.
 
 Note that the location of the folder will change depending on your version of Intel parallel studio and where you installed it.
 You could probably use gfortran instead of Intel fortran, but I don't go into that here.
 
-#### Building OpenSees
-1. Choose the build configuration (either Debug or Release)
-1. Right click on the OpenSees project in the Solution Explorer and select Build
+##### Building OpenSees (TCL)
 
+1. Link the fortran compiler
+1. Choose the build configuration (either Debug or Release)
+1. Right click on the **OpenSees** project in the **Solution Explorer** and select** Build**
 If there are no errors an OpenSees.exe will be created in `OpenSees/Win64/bin/`.
 
 
-### Compiling on Mac
+##### Building OpenSeesPy36
 
-TBD
+Ensure you have installed a Python distribution, I recommend Anaconda Python3.
+You will need to link some Python libraries and header files, to locate these directories open a terminal and enter `python` to open the Python prompt.
+In the prompt, enter
+```Python
+# thanks to https://stackoverflow.com/a/35071359
+from sysconfig import get_paths
+from pprint import pprint
 
+info = get_paths()  # a dictionary of key-paths
+
+# pretty print it for now
+pprint(info)
+```
+For me the output is
+```Python
+{'data': 'C:\\Users\\hartlope\\AppData\\Local\\Continuum\\Anaconda3',
+ 'include': 'C:\\Users\\hartlope\\AppData\\Local\\Continuum\\Anaconda3\\Include',
+ 'platinclude': 'C:\\Users\\hartlope\\AppData\\Local\\Continuum\\Anaconda3\\Include',
+ 'platlib': 'C:\\Users\\hartlope\\AppData\\Local\\Continuum\\Anaconda3\\Lib\\site-packages',
+ 'platstdlib': 'C:\\Users\\hartlope\\AppData\\Local\\Continuum\\Anaconda3\\Lib',
+ 'purelib': 'C:\\Users\\hartlope\\AppData\\Local\\Continuum\\Anaconda3\\Lib\\site-packages',
+ 'scripts': 'C:\\Users\\hartlope\\AppData\\Local\\Continuum\\Anaconda3\\Scripts',
+ 'stdlib': 'C:\\Users\\hartlope\\AppData\\Local\\Continuum\\Anaconda3\\Lib'}
+```
+I will call e.g., `C:\\Users\\hartlope\\AppData\\Local\\Continuum\\Anaconda3` as `<python_path>`
+
+Now we are ready to build the OpenSeesPy36 project:
+1. Follow the instructions for linking the fortran compiler, but select the OpenSeesPy36 project instead.
+1. Add another entry to the **Additional Library Directories** (similar to the fotran compiler directory): `<python_path>\libs`
+1. **Under Configuration Properties**, select **VC++ Directories**
+1. Add an additional entry to **Include Directories**: `<python_path>\Include`
+1. Accept the changes
+1. Choose the build configuration (either Debug or Release)
+1. Right click on the **OpenSeesPy36** project in the **Solution Explorer** and select **Build**
+If there are no errors an opensees.pyd will be created in `OpenSees/Win64/bin/py36/`
+
+#### Compiling on Mac/Linux
+
+These instructions are adapted from ones provided by Dr. Albano de Castro e Sousa.
+Disclaimer: I have only used Mac and not Linux, but in theory the steps are similar (also with the possibility of using apt-get instead of homebrew).
+
+- Install Xcode
+- Install tcl (follow guidelines from the OpenSees website: http://opensees.berkeley.edu/OpenSees/user/download.php )
+- Install gfortran:
+  - Install command line tools in Terminal: `xcode-select --install`
+  - Install homebrew in Terminal: `/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"`
+  - Install gfortran as part of gcc in brew: brew install gcc
+- Copy latest make definitions file (e.g. `OpenSees/MAKES/Makefile.def.MacOS10.8`) to `OpenSees/` as `Makefile.def`
+- Make sure that all the links to the compilers are all right, i.e. that the g++ is not g++-8 and that it's in the bin folder
+- Make sure all paths to libraries are okay in Makefile.def - e.g. `SUPERLUdir = $ (HOME)/OpenSees/OTHER/SuperLU5.1.1/SRC`
+- Create two folders: `/Users/username/bin` for the output executable, and `/Users/username/lib` for compiled libraries
+- Install openssl and add to `MACHINE_INCLUDES` in Makefile.def
+  - `brew install openssl``
+  - `-I/usr/local/Cellar/openssl/1.0.2r/include`
+  - Remove the `-lssl` flag `MACHINE_SPECIFIC_LIBS` in Makefile.def
+- Add library paths as needed to `MACHINE_NUMERICAL_LIBS` in Makefile.def e.g.:
+  - `/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/libgfortran.a`
+  - `/usr/local/Cellar/gcc/8.3.0/lib/gcc/8/libquadmath.a`
+  - `/usr/local/Cellar/openssl/1.0.2r/lib/libssl.dylib`
+- `make -B` to compile everything from scratch
+If there are no errors an opensees executable should appear in `/Users/username/bin`
+
+
+Instructions for compiling OpenSeesPy on Mac/Linux are TBD.
 
 ### Recommended workflow for Visual Studio
 
-Best practice is to not modify the upstream VS solution with system dependent changes.
+Best practice is to not modify the upstream VS solution with *local system* dependent changes.
 For example, do not try to add `C:\Program Files (x86)\IntelSWTools\compilers_and_libraries_2019\windows\compiler\lib\intel64_win` to the upstream VS solution, since this directory will be different for almost every user.
 The solution I use is to verify that the code compiles in a branch for local changes, then commit these changes in a different branch that does not include these local changes.
 Then, pull requests for the main OpenSees repository are only made from branches different from the one that contains the local changes.
+Let me explain the workflow.
 
 #### First time - create a branch for local changes
-1. Create a brach off of master for local changes, e.g., `git checkout master`, `git checkout -b VS_2019`.
+1. Create a branch off of master for local changes, e.g., `git checkout master`, `git checkout -b VS_2019`.
 1. Make local changes (e.g., link the Fortran compiler, link the Python headers).
 1. Verify that OpenSees compiles.
 1. Commit these changes to `VS_2019`.
