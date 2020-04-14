@@ -340,7 +340,7 @@ If there are no errors an OpenSees.exe will be created in `OpenSees/Win64/bin/`.
 
 ##### Building OpenSeesPy36
 
-Ensure you have installed a Python distribution, I recommend Anaconda Python3.
+Ensure you have installed a Python distribution, I recommend Anaconda Python3 64bit.
 You will need to link some Python libraries and header files, to locate these directories open a terminal and enter `python` to open the Python prompt.
 In the prompt, enter
 ```Python
@@ -367,6 +367,7 @@ For me the output is
 I will call e.g., `C:\\Users\\hartlope\\AppData\\Local\\Continuum\\Anaconda3` as `<python_path>`
 
 Now we are ready to build the OpenSeesPy36 project:
+1. Build the OpenSees project (TCL interpreter, see above), this is necessary to generate `tcl.lib`.
 1. Follow the instructions for linking the fortran compiler, but select the OpenSeesPy36 project instead.
 1. Add another entry to the **Additional Library Directories** (similar to the fotran compiler directory): `<python_path>\libs`
 1. **Under Configuration Properties**, select **VC++ Directories**
