@@ -26,7 +26,10 @@ There is jargon in this document (not only regarding git) - this is on purpose s
 I recommend to use the edition of Microsoft Visual Studio (VS) Community that corresponds to the OpenSees codebase.
 At the time of writing this is VS 2019, and it can change without any major notice as far as I know, you can figure it out by the build tool version.
 If you have an older version you just need to change the build tool version for each project in VS.
-I recommend that you use VS as an editor and to build OpenSees. 
+I recommend that you use VS as an editor and to build OpenSees.
+
+The Win64 solution is found in the directory: `OpenSees/Win64/OpenSees.sln`.
+This file can be opened in VS.
 
 ### Mac and Linux
 
@@ -98,8 +101,12 @@ Only the 64bit OpenSees solution is supported since around 2019, open this solut
 
 If you add the existing source files you need to let VS know about the additions.
 The VS solution needs to be updated because you or others will compile OpenSees on Windows at some point.
-For example, for the SLModel, add the .h and .cpp files as existing items to the material project under the uniaxial filter.
+For example, for the SLModel, add the .h and .cpp files as existing items to the `material` project under the `uniaxial` filter.
 If you want to create new files then add new items (the .h and .cpp files) to the appropriate project under the appropriate filter.
+
+If you are confused, see the following links for more information regarding projects and the VS build system:
+- https://docs.microsoft.com/en-us/cpp/build/creating-and-managing-visual-cpp-projects?view=vs-2019
+- https://docs.microsoft.com/en-us/cpp/build/projects-and-build-systems-cpp?view=vs-2019 
 
 #### Update the Makefiles
 
